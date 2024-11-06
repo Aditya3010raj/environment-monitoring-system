@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environment Monitoring Dashboard</title>
+    <style>
+        /* Overall Page Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: url('https://www.w3schools.com/w3images/forestbridge.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Header Styling */
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Data Container Styling */
+        .data-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+        }
+
+        /* Individual Data Tile Styling */
+        .data-item {
+            background: rgba(255, 255, 255, 0.85); /* Slight transparency */
+            border-radius: 15px;
+            width: 250px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            font-size: 1.4em;
+            color: #333;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Hover Effects */
+        .data-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .data-item .value {
+            font-weight: bold;
+            font-size: 1.8em;
+        }
+
+        /* Color Coding for Air Quality */
+        #air_quality {
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .good { background-color: #4CAF50; color: white; }
+        .moderate { background-color: #FFEB3B; color: #333; }
+        .poor { background-color: #FF5722; color: white; }
+
+        /* Animation for Tiles */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(50px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .data-item {
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Custom Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Environment Monitoring Dashboard</h1>
+        <div class="data-container">
+            <div class="data-item">
+                <p>Temperature: <span class="value" id="temperature">--</span> °C</p>
+            </div>
+            <div class="data-item">
+                <p>Humidity: <span class="value" id="humidity">--</span> %</p>
+            </div>
+            <div class="data-item">
+                <p>Pressure: <span class="value" id="pressure">--</span> hPa</p>
+            </div>
+            <div class="data-item">
+                <p>Wind Speed: <span class="value" id="wind_speed">--</span> m/s</p>
+            </div>
+            <div class="data-item">
+                <p>Air Quality: <span id="air_quality" class="good">--</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch("http://localhost:3000/api/data/latest");
+                const data = await response.json();
+
+                document.getElementById("temperature").textContent = data.temperature;
+                document.getElementById("humidity").textContent = data.humidity;
+                document.getElementById("pressure").textContent = data.pressure;
+                document.getElementById("wind_speed").textContent = data.wind_speed;
+
+                const airQualityElement = document.getElementById("air_quality");
+                airQualityElement.textContent = data.air_quality;
+
+                // Apply color coding based on AQI
+                if (data.air_quality <= 50) {
+                    airQualityElement.className = "good";
+                } else if (data.air_quality <= 100) {
+                    airQualityElement.className = "moderate";
+                } else {
+                    airQualityElement.className = "poor";
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.body.innerHTML = "<h3>Error fetching data</h3>";
+            }
+        }
+
+        setInterval(fetchData, 5000); // Refresh data every 5 seconds
+        fetchData(); // Initial fetch
+    </script>
+</body>
+</html>
